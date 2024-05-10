@@ -7,7 +7,7 @@ namespace APBD_KOL1_s21147.Services;
 public interface IDbService
 {
     Task<GetBookWithGenresDTO?> GetGenresByBookId(int id);
-    Task<int> AddBooksWithGenres(AddBooksDTO book);
+    Task AddBooksWithGenres(AddBooksDTO book);
     Task<bool> DoesGenreExist(int id);
 }
 
@@ -80,7 +80,7 @@ public class DbService : IDbService
         return result;
     }
     
-    public async Task<int> AddBooksWithGenres(AddBooksDTO book)
+    public async Task AddBooksWithGenres(AddBooksDTO book)
     {
         await using var connection = await GetConnection();
         var command = new SqlCommand();
@@ -104,7 +104,6 @@ public class DbService : IDbService
 
                 await command.ExecuteNonQueryAsync();
             }
-            return (int)id;
         }
         catch (Exception)
         {

@@ -1,5 +1,7 @@
 using APBD_KOL1_s21147.DTOs;
 using APBD_KOL1_s21147.Services;
+using APBD_KOL1_s21147.Validators;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,17 +25,20 @@ app.MapGet("api/books/{id:int}/genres", async (int id, IDbService db) =>
 {
     var result = await db.GetGenresByBookId(id);
     return result is null
-        ? Results.NotFound($"book with id:{id} does not exits")
+        ? Results.NotFound($"book with id:{id} doesn't exits")
         : Results.Ok(result);
 });
-app.MapPost("api/books", async (AddBooksDTO book, IDbService db) =>
+app.MapPost("api/books", async (AddBooksDTO book, IDbService db, IValidator<AddBooksDTO> validator) =>
 {
+    var validation = validator.Validate(book);
+    if (!validation.IsValid) 
+        return Results.ValidationProblem(validation.ToDictionary());
     foreach (var genre in book.Genres)
     {
         if (!await db.DoesGenreExist(genre))
             return Results.NotFound($"Genre with id - {genre} doesn't exist");
     }
-    var id=await db.AddBooksWithGenres(book);
-    return Results.Created("", db.GetGenresByBookId(id));
+    await db.AddBooksWithGenres(book);
+    return Results.Created("", null);
 });
 app.Run();
