@@ -87,6 +87,7 @@ public class DbService : IDbService
         command.Connection = connection;
         command.CommandText = """
                                    INSERT INTO books VALUES(@title)
+                                   SELECT @@IDENTITY AS PK;
                                    """;
         command.Parameters.AddWithValue("@title", book.Title);
         
